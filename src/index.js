@@ -170,3 +170,39 @@ const server = new GraphQLServer({
 server.start(({port}) => {
     console.log('The server is up on:', port)
 })
+
+
+/*
+
+#query
+query {
+	posts {
+	id
+	title
+	body
+	published
+	author {
+	name
+	}
+	}
+  comments {
+    id
+    text
+    user {
+      id
+      name
+      email
+      age
+    }
+    post {
+      id
+      author {
+        name
+        email
+        id
+        age
+      }
+    }
+  }
+}
+*/
