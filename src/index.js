@@ -16,7 +16,7 @@ const users = [{
     id: '3',
     name: 'Mike',
     email: 'mike@example.com'
-}];
+}]
 
 const posts = [{
     id: '10',
@@ -36,36 +36,36 @@ const posts = [{
     body: '',
     published: false,
     author: '2'
-}];
+}]
 
-const comment = [{
-    id: '101',
-    text: 'GraphQL 101',
-    post: '10',
-    user: '2'
-}, {
+const comments = [{
     id: '102',
-    text: 'GraphQL 102',
-    post: '10',
-    user: '3'
+    text: 'This worked well for me. Thanks!',
+    author: '3',
+    post: '10'
 }, {
     id: '103',
-    text: 'Programming Music',
-    post: '11',
-    user: '3'
-},{
+    text: 'Glad you enjoyed it.',
+    author: '1',
+    post: '10'
+}, {
     id: '104',
-    text: 'Programming Music',
-    post: '12',
-    user: '1'
-}];
+    text: 'This did no work.',
+    author: '2',
+    post: '11'
+}, {
+    id: '105',
+    text: 'Nevermind. I got it to work.',
+    author: '1',
+    post: '11'
+}]
 
 // Type definitions (schema)
 const typeDefs = `
     type Query {
         users(query: String): [User!]!
         posts(query: String): [Post!]!
-        comments(query: String): [Comment!]!
+        comments: [Comment!]!
         me: User!
         post: Post!
     }
@@ -75,6 +75,8 @@ const typeDefs = `
         name: String!
         email: String!
         age: Int
+        posts: [Post!]!
+        comments: [Comment!]!
     }
 
     type Post {
@@ -83,13 +85,14 @@ const typeDefs = `
         body: String!
         published: Boolean!
         author: User!
+        comments: [Comment!]!
     }
-    
+
     type Comment {
         id: ID!
-        user: User!
-        post: Post!
         text: String!
+        author: User!
+        post: Post!
     }
 `
 
@@ -116,21 +119,15 @@ const resolvers = {
                 return isTitleMatch || isBodyMatch
             })
         },
+        comments(parent, args, ctx, info) {
+            return comments
+        },
         me() {
             return {
                 id: '123098',
                 name: 'Mike',
                 email: 'mike@example.com'
             }
-        },
-        comments(parent, args, ctx, info) {
-            if(!args.query) {
-                return comment
-            }
-
-            return comment.filter((comment) => {
-                return comment.text.toLowerCase().includes(args.query.toLowerCase())
-            })
         },
         post() {
             return {
@@ -146,17 +143,34 @@ const resolvers = {
             return users.find((user) => {
                 return user.id === parent.author
             })
+        },
+        comments(parent, args, ctx, info) {
+            return comments.filter((comment) => {
+                return comment.post === parent.id
+            })
         }
     },
     Comment: {
-        user(parent, args, ctx, info) {
+        author(parent, args, ctx, info) {
             return users.find((user) => {
-                return user.id === parent.user
+                return user.id === parent.author
             })
         },
         post(parent, args, ctx, info) {
             return posts.find((post) => {
                 return post.id === parent.post
+            })
+        }
+    },
+    User: {
+        posts(parent, args, ctx, info) {
+            return posts.filter((post) => {
+                return post.author === parent.id
+            })
+        },
+        comments(parent, args, ctx, info) {
+            return comments.filter((comment) => {
+                return comment.author === parent.id
             })
         }
     }
@@ -167,42 +181,6 @@ const server = new GraphQLServer({
     resolvers
 })
 
-server.start(({port}) => {
-    console.log('The server is up on:', port)
+server.start(() => {
+    console.log('The server is up!')
 })
-
-
-/*
-
-#query
-query {
-	posts {
-	id
-	title
-	body
-	published
-	author {
-	name
-	}
-	}
-  comments {
-    id
-    text
-    user {
-      id
-      name
-      email
-      age
-    }
-    post {
-      id
-      author {
-        name
-        email
-        id
-        age
-      }
-    }
-  }
-}
-*/
