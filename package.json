@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon src/index.js --exec babel-node",
+    "start": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,7 +13,7 @@
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "graphql-yoga": "^1.18.3",
-    "nodemon": "^2.0.18"
+    "nodemon": "^2.0.19"
   },
   "devDependencies": {},
   "repository": {
